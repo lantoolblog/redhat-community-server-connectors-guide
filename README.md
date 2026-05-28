@@ -1,206 +1,158 @@
-# Redhat Community Server Connectors 사용 가이드
+# VSCode 및 Antigravity IDE에서 Tomcat 연동하기: Redhat Community Server Connectors 사용 가이드
 
-> VSCode와 이 계열  IDE 들에서 (Antigravity, Cursor)
->
-> Java 웹 프로젝트를 개발하면서 톰켓 연동해서 쓰기가 힘든 부분이 있는데, 
->
-> 설정 방법에 대해 가이드를 작성해보기로 했다.
+Java 웹 프로젝트를 개발할 때 Eclipse나 IntelliJ와 같은 전통적인 IDE를 사용하면 Tomcat 서버 연동이 비교적 수월합니다. 하지만 최근 널리 사용되는 VSCode나 Antigravity, Cursor와 같은 모던 IDE 환경에서는 Tomcat 서버를 연동하고 관리하는 과정이 다소 복잡하게 느껴질 수 있습니다. 
 
+이번 포스팅에서는 **Redhat Community Server Connectors** 확장을 활용하여 IDE 내에서 손쉽게 Tomcat 서버를 연동하고, 웹 프로젝트를 배포 및 실행하는 방법에 대해 상세히 알아보겠습니다.
 
+---
 
-## 테스트 환경 IDE
+## 1. 테스트 환경 준비 (IDE)
 
-VSCode는 많이 복잡해진 상태라... 건드리기가 싫어서 Antigravity IDE에서 확인해보기로 했다.
+본 가이드에서는 VSCode 대신, 최근 주목받고 있는 **Antigravity IDE**를 기준으로 설명합니다. (VSCode 및 Cursor 환경에서도 동일한 방식으로 적용할 수 있습니다.)
 
-* Antigravity IDE 다운로드
-  * https://antigravity.google/product/antigravity-ide
+* **Antigravity IDE 다운로드**: [공식 홈페이지 링크](https://antigravity.google/product/antigravity-ide)
 
+---
 
+## 2. 필수 확장 프로그램(Extension) 설치
 
+IDE에서 Java 웹 프로젝트를 정상적으로 구동하기 위해 기본 Java 환경 설정이 완료되었다고 가정합니다. 아래의 확장 프로그램들이 필요합니다.
 
+1. **Extension Pack for Java**
+   * [마켓플레이스 링크](https://open-vsx.org/vscode/item?itemName=vscjava.vscode-java-pack)
+   * Java 개발에 필요한 핵심 기능들이 포함된 패키지입니다.
 
-## 확장 설치
+2. **Runtime Server Protocol UI**
+   * [마켓플레이스 링크](https://open-vsx.org/vscode/item?itemName=redhat.vscode-rsp-ui)
+   * 서버 프로토콜의 UI를 제공하는 확장입니다.
 
-기본 Java 환경 확장들이나 설정들은 되었다고 간주하고, 
+3. **Community Server Connectors**
+   * [마켓플레이스 링크](https://open-vsx.org/vscode/item?itemName=redhat.vscode-community-server-connector)
+   * 이번 가이드의 핵심인 Tomcat 등 다양한 WAS(Web Application Server)와의 연동을 지원하는 확장입니다.
 
-* **Extension Pack for Java**
-  * https://open-vsx.org/vscode/item?itemName=vscjava.vscode-java-pack
-  * 이 확장이면 거의 필요한것 다 들어가 있음.
+---
 
+## 3. IDE에서 웹 프로젝트 로드 및 설정
 
+예제로 사용할 `spring-mvc-sample` 프로젝트를 루트 경로로 지정하여 IDE에서 로드하면 다음과 같은 화면을 확인할 수 있습니다.
 
-추가로 설치해야할 확장은...  아래 두가지이다.
+![image-20260528184229515](doc-resources/image-20260528184123327.png)
 
-* **Runtime Server Protocol UI**
-  * https://open-vsx.org/vscode/item?itemName=redhat.vscode-rsp-ui
+원활한 프로젝트 진행을 위해 `.vscode/settings.json` 파일에 Maven 실행 명령과 RSP 관련 설정을 미리 추가해 두었습니다.
 
+* **Maven 바로가기**: 좌측 하단에 설정한 Maven 빌드 명령이 표시되며, 클릭 시 즉시 실행 가능합니다.
+* **rsp-ui.startOnActivation**: Community Server Connector의 백엔드 서버 자동 시작 여부를 설정합니다. 웹 프로젝트 개발 시에는 활성화해 두는 것을 권장합니다.
+* **rsp-ui.rsp.java.home**: 프로젝트에 사용되는 Java 버전에 맞게 경로를 지정합니다.
 
+---
 
-* **Community Server Connectors**
-  * https://open-vsx.org/vscode/item?itemName=redhat.vscode-community-server-connector
+## 4. 예제 프로젝트 빌드 및 war:exploded
 
-
-
-
-
-## IDE에서 웹 프로젝트 로드
-
-[spring-mvc-sample](spring-mvc-sample) 이 프로젝트를 루트로 해서 Antigravity IDE에서 로드하면, 다음과 같은 화면으로 나타남.
-
-* 샘플 프로젝트에 워크스페이스 설정에 약간의 편의를 위한 maven 확장용 즐겨찾는 명령과 rsp 관련 설정을 **.vscode/settings.json**에 미리 넣어놨음.
-
-  ![image-20260528184229515](doc-resources/image-20260528184123327.png)
-
-  * Maven의 즐겨찾기 설정한 명령이 좌하단에 나타난 것을 볼 수 있고, 해당 부분을 눌러서 바로 실행이 가능함.
-  * rsp-ui의 startOnActivation는 Community Server Connector의 백앤드 서버를 바로 시작해둘지 여부이고, 웹프로젝트에서는 켜두는게 나아보임
-  * rsp-ui.rsp.java.home은... 프로젝트의 Java 버전과 일치하게 하면 됨.
-
-
-
-## 예제 프로젝트 빌드와 war:exploded
+좌측 하단의 즐겨찾기 명령을 통해 프로젝트를 빌드합니다.
 
 ![image-20260528184736984](doc-resources/image-20260528184736984.png)
 
-즐겨찾기 명령에서 바로 실행할 수 있고.
-
-실행 후 target을 보면 Tomcat에 배포할 파일들이 잘 생성된 것을 확인할 수 있음
+빌드가 완료된 후 `target` 디렉터리를 확인해 보면, Tomcat에 배포할 파일들이 성공적으로 생성된 것을 볼 수 있습니다.
 
 ![image-20260528185022301](doc-resources/image-20260528185022301.png)
 
+---
 
+## 5. Tomcat 서버 다운로드 및 준비
 
-## Tomcat 서버 준비
+Community Server Connector에는 WAS 자동 다운로드 기능이 내장되어 있습니다. 하지만 서버 파일들을 더 체계적으로 관리하기 위해, 별도의 디렉터리를 생성하고 공식 홈페이지에서 Tomcat을 수동으로 다운로드하여 연동하는 방식을 추천합니다.
 
-Community Server Connector의 내장기능으로 WAS들의 자동 다운로드 기능이 있긴하지만....
+본 가이드에서는 `G:\redhat-community-server-connector` 경로에 Tomcat 10.1.55 버전을 다운로드하여 압축을 해제했습니다.
 
-뭔가 관리가 부실해보여서... Tomcat을 모아둘 별도 경로를 만들어두고 거기에 수동 다운로드 받은 후 연동하는게 나아보였다.
-
-
-
-나는 아래 처럼 G 드라이브에 redhat-community-server-connector라는 폴더를 만들고, apache-tomcat-10.1.55-windows-x64.zip 압축파일을 공식 tomcat 홈페이지에서 받아서 압축을 풀었음.
-
-```
+```text
 G:\redhat-community-server-connector
   │   apache-tomcat-10.1.55-windows-x64.zip
   │
   └───apache-tomcat-10.1.55\
 ```
 
-* 윈도우 64bit용 Tomcat 10.1.55 다운로드
-  * https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.55/bin/apache-tomcat-10.1.55-windows-x64.zip
+* **Tomcat 10.1.55 (Windows 64bit) 다운로드**: [Apache Tomcat 공식 다운로드 링크](https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.55/bin/apache-tomcat-10.1.55-windows-x64.zip)
 
+---
 
+## 6. Community Server Connector에 서버 추가 및 배포
 
-## Community Server Connector에 서버 추가
+이제 준비된 Tomcat 서버를 IDE에 등록할 차례입니다.
 
-IDE로 돌아와서...  Community Server Connector에서 오른쪽 메뉴를 열면..
+### 6.1 서버 등록
+1. IDE의 Server 뷰(Community Server Connector)에서 우클릭 후 **Create New Server...**를 클릭합니다.
+   
+   ![image-20260528185542204](doc-resources/image-20260528185542204.png)
 
-Create New Server... 라고 있음.. 클릭!!
+2. 서버를 다운로드할지 묻는 알림 창이 나타나면, 수동으로 다운로드한 파일을 사용할 것이므로 **No**를 선택합니다.
+   
+   ![image-20260528185713445](doc-resources/image-20260528185713445.png)
 
-![image-20260528185542204](doc-resources/image-20260528185542204.png)
+3. 압축을 해제한 Tomcat 경로(`G:\redhat-community-server-connector\apache-tomcat-10.1.55`)를 지정합니다.
+   
+   ![image-20260528185903853](doc-resources/image-20260528185903853.png)
 
-다운로드할 거냐고 묻는데, 위에서 미리 다운로드 받은 것을 쓸 것이므로 No 선택
+4. 서버 이름은 식별하기 쉽도록 `Tomcat 10.1.55`와 같이 명시적으로 지정해 줍니다.
 
-![image-20260528185713445](doc-resources/image-20260528185713445.png)
+### 6.2 프로젝트 배포 (Add Deployment)
+추가된 서버에 빌드된 프로젝트를 배포해야 합니다.
 
-경로는 아까 준비했던... 경로로 설정해주고..
+1. 추가한 서버 항목에서 우클릭 후 **Add Deployment**를 선택합니다.
+   
+   ![image-20260528190047609](doc-resources/image-20260528190047609.png)
 
-![image-20260528185903853](doc-resources/image-20260528185903853.png)
+2. 배포 타입 선택 창이 나타나면, 단일 WAR 파일 대신 빌드된 디렉터리를 바로 사용할 것이므로 **Exploded**를 선택합니다.
+   
+   ![image-20260528190227045](doc-resources/image-20260528190203022.png)
 
-나는 서버 네임만 Tomcat 10.x라고 기본 값 나타나던거 10.1.55로 명시적으로 써줬음.
+3. 빌드 출력 경로인 `{프로젝트 루트}\target\spring-mvc-sample`을 선택합니다.
 
-이제 war:exploded 한 경로와 연결을 해줘야하는데...
+4. 배포 파라미터 추가 여부를 묻는 창에서 **Yes**를 선택합니다. 파라미터를 입력하지 않으면 Context Root가 프로젝트 이름으로 고정됩니다.
+   
+   ![image-20260528190422589](doc-resources/image-20260528190422589.png)
 
-![image-20260528190047609](doc-resources/image-20260528190047609.png)
+5. 출력 이름을 **ROOT**로 지정합니다. (참고로, Exploded 방식이 아닌 WAR 방식이라면 `ROOT.war`로 입력해야 합니다.)
+   
+   ![image-20260528190620760](doc-resources/image-20260528190620760.png)
 
-방금 추가한 Tomcat 10.1.55 에서 오른쪽 마우스 메뉴 열어서 **Add Deployment**를 눌러줌.
+6. 이어지는 추가 파라미터 입력 창은 빈 상태로 두고 넘어갑니다.
+   
+   ![image-20260528190906205](doc-resources/image-20260528190906205.png)
 
-
-
-그러면 배포 타입 선택창이 나옴...
-
-![image-20260528190227045](doc-resources/image-20260528190203022.png)
-
-WAR 파일을 사용하지 않고, Exploded된 경로를 사용하기로 했으므로 Exploded 선택하자!
-
-`{프로젝트 루트}\target\spring-mvc-sample` 이 경로를 선택하면 됨
-
-
-
-배포 파라미터 추가하길 원하는지 물어보는데...
-
-![image-20260528190422589](doc-resources/image-20260528190422589.png)
-
-Yes라고 해주자! 파라미터를 안주면...  
-
-Context Root가 프로젝트 이름으로 고정되어버림..
-
-
-
-다음 나타나는 아래 입력 창에서 출력이름을 ROOT로 아래처럼 지정해줘야한다.
-
-![image-20260528190620760](doc-resources/image-20260528190620760.png)
-
-만약 Exploded 방식이 아니라 war 파일 방식이였다면 ROOT.war로 적어야함.
-
-
-
-또 다른 입력창이 또 뜨는데...
-
-![image-20260528190906205](doc-resources/image-20260528190906205.png)
-
-여기는 빈내용으로 넘어간다.
-
-
-
-배포설정이 다음과 같이 추가되는데..
+### 6.3 배포 동기화 (Full Publish)
+배포 설정이 완료되면 동기화를 위한 **Full Publish** 요청 알림이 나타납니다.
 
 ![image-20260528191016054](doc-resources/image-20260528191016054.png)
-
-Full Publish를 해달라고 한다...😅
-
 ![image-20260528191124258](doc-resources/image-20260528191124258.png)
 
-해주도록 하자!!!
+안내에 따라 **Yes**를 클릭하여 퍼블리시를 진행하면 상태가 정상적으로 동기화됩니다.
 
 ![image-20260528191204766](doc-resources/image-20260528191204766.png)
 
-상태가 동기화된것을 알 수 있음...
+---
 
+## 7. 서버 실행 및 결과 확인
 
+모든 설정이 완료되었습니다. 이제 서버를 실행해 보겠습니다.
 
+1. Tomcat 서버 항목을 우클릭하고 **Start Server**를 클릭합니다.
+   
+   ![image-20260528191256799](doc-resources/image-20260528191256799.png)
 
+2. IDE 하단의 Output 탭에서 Tomcat 서버의 실행 로그가 정상적으로 출력되는지 확인합니다.
+   
+   ![image-20260528191436967](doc-resources/image-20260528191436967.png)
 
-이제 실행해보자!!
+3. 브라우저를 열고 `http://localhost:8080`에 접속하여 웹 애플리케이션이 정상적으로 구동되는지 확인합니다.
+   
+   ![image-20260528191530736](doc-resources/image-20260528191530736.png)
 
-아래처럼 Tomcat 10.1.55 부분에서 오른쪽 마우스 메뉴 열어서 Start Server 눌러주자!!
+화면이 정상적으로 렌더링된다면 연동에 성공한 것입니다! 👍
 
-![image-20260528191256799](doc-resources/image-20260528191256799.png)
+---
 
+## 8. 마무리
 
+처음 환경을 구성할 때는 전용 도구가 잘 갖춰진 Eclipse나 IntelliJ 환경에 비해 다소 번거롭게 느껴질 수 있습니다. 하지만, 직접 설정 파일들을 건드리며 구성하는 것보다는 Redhat Community Server Connectors를 활용하는 편이 관리 측면에서 훨씬 수월하고 효율적입니다. 
 
-
-
-Output 창에서 Tomcat 서버 실행로그가 잘 뜨는 것을 확인할 수 있음.
-
-![image-20260528191436967](doc-resources/image-20260528191436967.png)
-
-
-
-브라우저에서 `http://localhost:8080` 으로 접근해보면..
-
-![image-20260528191530736](doc-resources/image-20260528191530736.png)
-
-잘 실행됨을 확인할 수 있음...👍👍
-
-
-
-
-
-## 의견
-
-확실히 Eclipse나 IntelliJ에서 Tomcat 설정해서 사용하는 것보단 불편한 점이 있긴해도... 
-
-그래도 아무것도 없이 수동설정하는 것 보단 훨씬 나아서...
-
-잘 쓸 수 있을 것 같다. 😊🎉🎉
+VSCode나 Antigravity IDE를 활용하여 Java 웹 프로젝트를 구축하시려는 분들께 이 가이드가 도움이 되기를 바랍니다. 😊
