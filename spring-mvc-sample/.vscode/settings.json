@@ -17,4 +17,6 @@
       "startOnActivation": true
     }
   ],
+  // Community Server Connector 및 톰캣 구동용 Java Home 설정
+  "rsp-ui.rsp.java.home": "C:\\JDK\\21",
 }
