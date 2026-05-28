@@ -9,5 +9,12 @@
     {
       "command": "-DskipTests clean prepare-package war:exploded"
     },
-  ]
+  ],
+  "rsp-ui.enableStartServerOnActivation": [
+    {
+      "id": "redhat.vscode-community-server-connector",
+      "name": "Community Server Connector",
+      "startOnActivation": true
+    }
+  ],
 }
