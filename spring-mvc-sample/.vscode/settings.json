@@ -1,0 +1,13 @@
+{
+  "maven.terminal.favorites": [
+    {
+      "command": "clean test"
+    },
+    {
+      "command": "-DskipTests clean package"
+    },
+    {
+      "command": "-DskipTests clean package war:exploded"
+    },
+  ]
+}
