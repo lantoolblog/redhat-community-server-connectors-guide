@@ -7,7 +7,7 @@
       "command": "-DskipTests clean package"
     },
     {
-      "command": "-DskipTests clean package war:exploded"
+      "command": "-DskipTests clean prepare-package war:exploded"
     },
   ]
 }
